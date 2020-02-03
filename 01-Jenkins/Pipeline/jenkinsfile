@@ -18,7 +18,11 @@ node {
  stage('Maven-Compile') {
    sh label: '', script: 'mvn compile'
   }
-  
+  stage('Sonar Analysis'){
+        withSonarQubeEnv('Sonarqube'){
+         sh 'mvn sonar:sonar'
+        }
+        }
    stage('Maven-Test') {
    sh label: '', script: 'mvn test'
   }
@@ -30,6 +34,16 @@ node {
    stage('Archive-Artifacts') {
    archiveArtifacts 'target/*.war'
   }
+  stage('Jfrog Artifacory Upload') {
+        def server= Artifactory.server 'Artifactory'
+                    def uploadSpec= """{
+                        "files": [{
+                        "pattern": "/home/mtadminnuvepro/.jenkins/workspace/capstone301/01-Jenkins/Code/petclinic/target/*.war",
+                        "target": "natam"}]
+                    }"""
+        server.upload(uploadSpec)
+        
+        }
    stage('Docker-Stage-Deployment') {
    sh label: '', script: 'docker-compose up -d --build'
   }
@@ -38,7 +52,20 @@ node {
   sh label: 'Docker', script: 'cp -rf target/*.war ../../../04-Terraform/03-Ansible-Deploy/ansible/04-Tomcat/templates/'
   sh label: 'Jenkins', script: "echo '<h1> TASK BUILD ID: ${env.BUILD_DISPLAY_NAME}</h1>' > ../../../04-Terraform/03-Ansible-Deploy/ansible/04-Tomcat/templates/apps/index.html"
 }  
+   stage('Jfrog Artifactory download'){
+    def server= Artifactory.server 'Artifactory'
+    def downloadSpec = """{
+    "files": [
+    {
+      "pattern": "natam/*.war",
+      "target": "/home/mtadminnuvepro/artifacts/"
+      
+    }
+    ]
+    }"""
+    server.download(downloadSpec)
    
+}
  }
 
 def project_terra="04-Terraform/03-Ansible-Deploy"
