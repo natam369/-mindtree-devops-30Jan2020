@@ -10,7 +10,7 @@ services:
   sonarqube:
     image: bitnami/sonarqube:7
     ports:
-      - '8090:9000'
+      - '8082:9000'
     environment:
       - POSTGRESQL_HOST=postgresql
       - POSTGRESQL_ROOT_USER=postgres
