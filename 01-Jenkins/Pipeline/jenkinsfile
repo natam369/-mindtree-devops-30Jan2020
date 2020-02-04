@@ -38,7 +38,7 @@ node {
         def server= Artifactory.server 'Artifactory'
                     def uploadSpec= """{
                         "files": [{
-                        "pattern": "/root/.jenkins/workspace/petclinic_demo/01-Jenkins/Code/petclinic/target/*.war",
+                        "pattern": "/target/*.war",
                         "target": "natam"}]
                     }"""
         server.upload(uploadSpec)
@@ -52,20 +52,6 @@ node {
   sh label: 'Docker', script: 'cp -rf target/*.war ../../../04-Terraform/03-Ansible-Deploy/ansible/04-Tomcat/templates/'
   sh label: 'Jenkins', script: "echo '<h1> TASK BUILD ID: ${env.BUILD_DISPLAY_NAME}</h1>' > ../../../04-Terraform/03-Ansible-Deploy/ansible/04-Tomcat/templates/apps/index.html"
 }  
-   stage('Jfrog Artifactory download'){
-    def server= Artifactory.server 'Artifactory'
-    def downloadSpec = """{
-    "files": [
-    {
-      "pattern": "natam/*.war",
-      "target": "/home/mtadminnuvepro/artifacts/"
-      
-    }
-    ]
-    }"""
-    server.download(downloadSpec)
-   
-}
  }
 
 def project_terra="04-Terraform/03-Ansible-Deploy"
